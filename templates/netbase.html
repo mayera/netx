@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <title>Network Tools</title>
+    <!--link rel="stylesheet" type="text/css" href="/site_media/css/netstyles.css"-->
+</head>
+<body>
+    <h1>Available Tools</h1>
+  
+    <h2>Network Upload</h2>
+    {% block status %} 
+    <p></p>
+    {% endblock %}
+    {% if form.errors %}
+        <p style="color: red;">
+            Please correct the error{{ form.errors|pluralize }} below.
+        </p>
+    {% endif %}
+
+    <form action="/nets/netupload/" enctype="multipart/form-data" method="post"> <!--Example of a pulldown menu; like one 
+relevant for network input, unless that can be done serverside; by 
+ending format tag; and then test against deception-->
+     {{ form.errors }}
+
+      {% if UploadException %}
+      <p style="color:red;margin-left:20px">You may not have specified anything for uploading.</p>
+      {% endif %}
+
+{%comment%}
+
+    <label for="id_netformat"><b>Select graph input format and enter file path</b></label><select name="nf" id="id_netformat"><br />
+      <option value="adjl">Adjacency List</option>
+      <option value="edgl">Edge List</option>
+      <option value="gml">GML</option>
+      <option value="grml">GraphML</option>
+      <option value="leda">LEDA</option>
+      <option value="pjk">Pajek</option>
+      <option value="sg6">SparseGraph6</option>
+    </select>
+
+{%endcomment%}
+
+    <input type="file" name="file">  
+    <input type="submit" value="Submit">
+    </form>
+
+{% block action %}{% endblock %}
+
+
+<h2>Generates Analyses</h2>
+   <form action="/nets/netinfo/" method="get"> 
+{%comment%}
+Example of a pulldown menu; like one
+relevant for network input, unless that can be done serverside; by
+ending format tag; and then test against deception; needs to have a seperate URL linking to a
+seperate view if the two forms on this page are handled separately; e.g. maybe (r'^nets/netinfo/$', netinfo),
+but what if i want their output to be integrated in the same page? need they then be handled in the same view?
+{%endcomment%}
+     <!-- {{ form.errors }} -->
+<!--<label for="id_se"><b>Search by:</b></label>
+	<select name="se" id="id_se"></select>-->
+    <input type="submit" value="Display Statistics"> {# creates button #}
+    </form>
+
+
+{% block results %}{% endblock %}
+
+{% block degree %} 
+<div style="clear:both"/>
+
+<div id="degbox">
+<form action="/nets/netdeg/" method="get">
+<input type="submit" value="Generate Degree Distribution Histogram">
+</form>
+
+<img src="/site_media/nets/degree_histogram.png" title="Degree Histogram">
+</div>
+{% endblock %}
+
+{% block error %} {% endblock %}
+
+{% block display %}{% endblock %}
+
+</body>
+</html>
+
