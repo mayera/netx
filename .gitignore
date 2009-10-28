@@ -1,0 +1,6 @@
+*.pyc
+.*.swp
+*~
+env
+media/nets/livenet.xdot
+local_settings.py
