@@ -1,6 +1,6 @@
 import os, re
 
-import human.nets.nets as nets
+import nets #.nets as nets
 import networkx as nx
 
 from django.test import TestCase, Client

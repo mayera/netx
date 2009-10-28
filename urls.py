@@ -17,7 +17,7 @@ urlpatterns = patterns('', #is the order these are in relevant to speed optimisa
 )
 
 #network tools
-urlpatterns += patterns('human.nets.views',
+urlpatterns += patterns('nets.views',
 	(r'^nets/$', 'netbase'),
 	(r'^nets/netinfo/$', 'netinfo'),
         (r'^nets/canviz/$', 'canviz_graph'),

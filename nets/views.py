@@ -15,7 +15,7 @@ from django.http import HttpResponse
 #from django.conf import settings #needs both this and the settings * import
 
 import re, os
-import human.nets.nets as nets
+import nets #.nets.nets as nets
 
 """Helper classes"""
 
