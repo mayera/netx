@@ -1,0 +1,37 @@
+!!python/object:networkx.graph.Graph
+adj:
+  '0':
+    '1': null
+  '1':
+    '0': null
+    '2': null
+  '10':
+    '11': null
+    '9': null
+  '11':
+    '10': null
+  '2':
+    '1': null
+    '3': null
+  '3':
+    '2': null
+    '4': null
+  '4':
+    '3': null
+    '5': null
+  '5':
+    '4': null
+    '6': null
+  '6':
+    '5': null
+    '7': null
+  '7':
+    '6': null
+    '8': null
+  '8':
+    '7': null
+    '9': null
+  '9':
+    '10': null
+    '8': null
+name: ''

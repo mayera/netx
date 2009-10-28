@@ -1,0 +1,89 @@
+import re, types, pygraphviz, os
+import networkx as nx
+import settings
+
+class NetworkParseException(Exception):
+    pass
+
+class WebbyGraph(nx.Graph):
+
+    def __init__(self, nx_graph = settings.NXGRAPHPATH):
+        if(type(nx_graph) == nx.Graph):
+            self.nx_graph = nx_graph
+        else:
+            self.nx_graph = load_net(nx_graph)
+
+    def highlight_shortest_path_between(self, n1, n2):
+        path = nx.shortest_path(self.nx_graph, n1, n2)
+
+        def colorize(thing):
+            for att in thing.attr.items():
+                name, val = att
+                if re.search('draw', name):
+                    thing.attr[name], unused_count = re.subn('-black', '-green', val)
+
+        for node in self.canviz_output().nodes():
+            if node.title() in path:
+                colorize(node)
+        for edge in self.canviz_output().edges():
+            if edge[0] in path and edge[1] in path:
+                colorize(edge)
+
+        self.save_canviz_graph()
+
+    def save(self):
+        self.save_nx_graph()
+        self.save_canviz_graph()
+
+    def save_canviz_graph(self):
+        if hasattr(self, 'graphviz_graph'):
+            f = open(settings.CANVIZGRAPHPATH, 'w')
+            f.write(self.graphviz_graph.to_string())
+            f.close()
+
+    def save_nx_graph(self):
+        nx.write_adjlist(self.nx_graph, settings.NXGRAPHPATH)
+
+    def canviz_output(self):
+        if not hasattr(self, 'graphviz_graph'):
+            self.generate_canviz_output()
+        return self.graphviz_graph
+        
+    def generate_canviz_output(self):
+        nx.write_dot(self.nx_graph, settings.CANVIZGRAPHPATH)
+        os.popen('dot -Nid="canviz_node_\\\\N" -Nclass=canviz_node -Nhref="javascript:void(click_node(\'\\\\N\'))" -Txdot %s -o%s' % (settings.CANVIZGRAPHPATH, settings.CANVIZGRAPHPATH))
+        self.graphviz_graph = pygraphviz.AGraph()
+        self.graphviz_graph.read(settings.CANVIZGRAPHPATH)
+
+def load_net(f):
+    if type(f) in types.StringTypes:
+        return load_net_from_string(f)
+    else:
+        return load_net_from_file(f)
+
+
+def load_net_from_string(s):
+    format = re.match(".*\.([a-zA-Z]+)$", s)
+    if format:
+        read_name = "read_" + format.groups()[0]
+        if nx.__dict__.has_key(read_name):
+            read = nx.__dict__[read_name]
+            g = read(s)
+            return(g)
+    return try_all_readers_on(s)
+
+def load_net_from_file(f):
+    return try_all_readers_on(f)
+
+def try_all_readers_on(f):
+    for method in nx.__dict__.keys():
+        #:MC: read_dot segfaults on read failures...
+        if re.match('^read_(?!dot)', method):
+            g = None
+            try:
+                g = getattr(nx, method)(f)
+            except:
+                pass
+            if g and isinstance(g, nx.Graph) and g.size() > 0:
+                return g
+    raise NetworkParseException("Unparseable file format")
