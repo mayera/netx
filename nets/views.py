@@ -12,7 +12,7 @@ import pydot #relative value of importing modules here vs in specific view?
 import matplotlib.pyplot as plt
 import matplotlib
 from django.http import HttpResponse
-#from django.conf import settings #needs both this and the settings * import
+# from django.conf import settings #needs both this and the settings * import
 
 import re, os
 import nets #.nets.nets as nets
