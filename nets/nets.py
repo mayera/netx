@@ -58,13 +58,14 @@ def load_net_from_file(f):
 
 def try_all_readers_on(f):
     for method in nx.__dict__.keys():
-        #:MC: read_dot segfaults on read failures...
+        f.seek(0)
+        #:MC: read_dot segfaults (yes, segfaults) on read failures...
         if re.match('^read_(?!dot)', method):
             g = None
             try:
                 g = getattr(nx, method)(f)
             except:
                 pass
-            if g and isinstance(g, nx.Graph) and g.size() > 0:
+            if g and g.size() > 0:
                 return g
     raise NetworkParseException("Unparseable file format")
