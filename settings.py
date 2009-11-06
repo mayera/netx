@@ -73,7 +73,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'nets.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     BASE_REL('templates'),
@@ -89,7 +89,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
 #    'django.contrib.databrowse',
-    'nets.nets',
+    'nets',
 )
 
 try:

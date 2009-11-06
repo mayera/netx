@@ -3,13 +3,8 @@
 <head>
     <title>Network Tools</title>
     <link rel="stylesheet" type="text/css" href="/site_media/css/netstyles.css">
-    <link rel="stylesheet" type="text/css" href="/site_media/css/canviz.css">
     <link rel="stylesheet" type="text/css" href="/site_media/css/app.css">
-    <script type="text/javascript" src="/site_media/js/prototype.js"></script>
     <script type="text/javascript" src="/site_media/js/path.js"></script>
-    <script type="text/javascript" src="/site_media/js/excanvas.js"></script>
-    <script type="text/javascript" src="/site_media/js/canviz.js"></script>
-    <script type="text/javascript" src="/site_media/js/x11colors.js"></script>
     <script type="text/javascript" src="/site_media/js/app.js"></script>
 </head>
 <body>
@@ -90,23 +85,6 @@ but what if i want their output to be integrated in the same page? need they the
 {% block display %}{% endblock %}
 
 </div>
-
-<div id="canviz_test"></div>
-<div id="debug_output"></div>
-<div id="node_handler">
-  <form id="node_handler_form">
-    <input type="hidden" name="node_zero" id="node_zero_input" />
-    <input type="hidden" name="node_one" id="node_one_input" />
-    <dl>
-      <dt>First selected node</dt>
-      <dd class="node_unselected" id="node_zero_display">None<dd>
-      <dt>Secord selected node</dt>
-      <dd class="node_unselected" id="node_one_display">None<dd>
-    </dl>
-    <button type="submit" id="node_shortest_path_button">Find shortest path between nodes</button>
-  </form>
-</div>
-
 </body>
 </html>
 
