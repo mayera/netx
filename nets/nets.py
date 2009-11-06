@@ -58,7 +58,8 @@ def load_net_from_file(f):
 
 def try_all_readers_on(f):
     for method in nx.__dict__.keys():
-        f.seek(0)
+        if type(f) not in types.StringTypes:
+            f.seek(0)
         #:MC: read_dot segfaults (yes, segfaults) on read failures...
         if re.match('^read_(?!dot)', method):
             g = None
