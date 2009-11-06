@@ -5,13 +5,10 @@ import settings
 class NetworkParseException(Exception):
     pass
 
-class WebbyGraph(nx.Graph):
+class WebbyGraph:
 
     def __init__(self, nx_graph = settings.NXGRAPHPATH):
-        if(type(nx_graph) == nx.Graph):
-            self.nx_graph = nx_graph
-        else:
-            self.nx_graph = load_net(nx_graph)
+        self.nx_graph = load_net(nx_graph)
 
     def highlight_shortest_path_between(self, n1, n2):
         path = nx.shortest_path(self.nx_graph, n1, n2)

@@ -153,15 +153,6 @@ def netinfo(request):
     nssresult = netstats_simple(G.nx_graph)
     return render_to_response('netinfo.html', nssresult) 
 
-def canviz_graph(request):
-    G = nets.WebbyGraph()
-    response = HttpResponse(mimetype="text/vnd-graphviz")
-    response['Content-Disposition'] = 'attachment; filename=livenet.xdot'
-    graph = open(CANVIZGRAPHPATH)
-    response.write(graph.read())
-    graph.close()
-    return response
-
 def netdisplaytest(G,fprop,fformat,layout):
     #stat: speed of matlab vs pydot in generating layouts and saving
     if not os.path.isfile(NXGRAPHPATH):
@@ -300,10 +291,6 @@ def netdisplay(request): #based on showpathgraph
         raise FileNotFoundError
 
     G = nets.WebbyGraph() #.nx_graph
-    G.generate_canviz_output()
-    G.save()
-    return render_to_response('netinfo.html')
-
     if request.method == 'GET':
         f = netdispform(request.GET)
         if not f.is_valid():
