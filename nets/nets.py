@@ -22,38 +22,19 @@ class WebbyGraph(nx.Graph):
                 if re.search('draw', name):
                     thing.attr[name], unused_count = re.subn('-black', '-green', val)
 
-        for node in self.canviz_output().nodes():
-            if node.title() in path:
-                colorize(node)
-        for edge in self.canviz_output().edges():
-            if edge[0] in path and edge[1] in path:
-                colorize(edge)
-
-        self.save_canviz_graph()
+        #         for node in self.canviz_output().nodes():
+        #             if node.title() in path:
+        #                 colorize(node)
+        #         for edge in self.canviz_output().edges():
+        #             if edge[0] in path and edge[1] in path:
+        #                 colorize(edge)
+        #         self.save_canviz_graph()
 
     def save(self):
         self.save_nx_graph()
-        self.save_canviz_graph()
-
-    def save_canviz_graph(self):
-        if hasattr(self, 'graphviz_graph'):
-            f = open(settings.CANVIZGRAPHPATH, 'w')
-            f.write(self.graphviz_graph.to_string())
-            f.close()
 
     def save_nx_graph(self):
         nx.write_adjlist(self.nx_graph, settings.NXGRAPHPATH)
-
-    def canviz_output(self):
-        if not hasattr(self, 'graphviz_graph'):
-            self.generate_canviz_output()
-        return self.graphviz_graph
-        
-    def generate_canviz_output(self):
-        nx.write_dot(self.nx_graph, settings.CANVIZGRAPHPATH)
-        os.popen('dot -Nid="canviz_node_\\\\N" -Nclass=canviz_node -Nhref="javascript:void(click_node(\'\\\\N\'))" -Txdot %s -o%s' % (settings.CANVIZGRAPHPATH, settings.CANVIZGRAPHPATH))
-        self.graphviz_graph = pygraphviz.AGraph()
-        self.graphviz_graph.read(settings.CANVIZGRAPHPATH)
 
 def load_net(f):
     if type(f) in types.StringTypes:

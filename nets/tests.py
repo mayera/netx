@@ -50,7 +50,7 @@ class NetsTests(TestCase):
         g = nets.WebbyGraph(os.path.join(test_net_path, 'test.adjlist'))
         self.assert_(type(g.nx_graph) == nx.Graph)
 
-    def test_should_color_green_for_shortest_path(self):
+    def _test_should_color_green_for_shortest_path(self):
         # this test relies on the test data being connected correctly
         g = nets.WebbyGraph(os.path.join(test_net_path, 'test.adjlist'))
         n1 = '2'
