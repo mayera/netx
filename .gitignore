@@ -4,3 +4,4 @@
 env
 media/nets/livenet.xdot
 local_settings.py
+media/nets/test.adjlist
