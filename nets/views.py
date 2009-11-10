@@ -294,6 +294,13 @@ def netdisplay(request): #based on showpathgraph
     class ShortestPathForm(forms.Form):
         node_one = forms.ChoiceField(label="First Node", choices=G.node_choices(), required=True)
         node_two = forms.ChoiceField(label="Second Node", choices=G.node_choices(), required=True)
+        def clean(self):
+            cleaned_data = self.cleaned_data
+            if cleaned_data.get('node_one') and cleaned_data.get('node_two') and (
+                cleaned_data.get('node_one') == cleaned_data.get('node_two') ):
+                raise forms.ValidationError("Please choose two different nodes")
+            return cleaned_data
+                    
 
     if request.method == 'POST':
         shortest_path_form = ShortestPathForm(request.POST)
@@ -330,7 +337,6 @@ def netdisplay(request): #based on showpathgraph
            pname = 'H'
            #           fformat = 'png'
            #           layout = 'neato'
-           #           print fprop
 
            try:
                netdisplaytest(G,fprop,fformat,layout)
@@ -338,8 +344,6 @@ def netdisplay(request): #based on showpathgraph
                return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':False,'noConnection':True})
            except NoComponentError:
                return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':True, 'noConnection':False})
-           # print 'fformat: '
-           # print fformat
 
            return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname, 'noComponent':False, 'noConnection':False})
 

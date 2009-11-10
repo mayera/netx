@@ -19,9 +19,9 @@ class NetsTests(TestCase):
         self.assertContains(resp, "uploaded")
 
     def test_should_highligh_the_shortest_path_between_nodes(self):
+        #:MC: icky, brittle test, but how else can i test that the image is colored correctly?
         c = Client()
         resp = c.post('/nets/netdisplay/', {'node_one': '10', 'node_two': '8'})
-        #:MC: icky, brittle test, but how else can i test that the image is colored correctly?
         self.assertContains(resp, "Highlighted the shortest path between nodes '10' and '8'")
 
     def test_load_net_should_load_known_net_types(self):
