@@ -6,3 +6,4 @@ media/nets/livenet.xdot
 local_settings.py
 media/nets/test.adjlist
 media/nets/degree_histogram.png
+media/nets/H.png
