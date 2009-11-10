@@ -144,8 +144,8 @@ def netinfo(request):
         if os.path.isfile(MEDIA_ROOT + '/nets/H.' + f):
             os.remove(MEDIA_ROOT + '/nets/H.' + f)
 
-    if os.path.isfile(MEDIA_ROOT+"/nets/degree_histogram.png"):
-        os.remove(os.path.join(MEDIA_ROOT+"/nets/degree_histogram.png"))
+    if os.path.isfile(os.path.join(MEDIA_ROOT, "nets", "degree_histogram.png")):
+        os.remove(os.path.join(MEDIA_ROOT, "nets", "degree_histogram.png"))
 
     G = nets.WebbyGraph()
     if request.GET.has_key('node_zero') and request.GET.has_key('node_one'):
@@ -291,7 +291,23 @@ def netdisplay(request): #based on showpathgraph
         raise FileNotFoundError
 
     G = nets.WebbyGraph() #.nx_graph
-    if request.method == 'GET':
+    class ShortestPathForm(forms.Form):
+        node_one = forms.ChoiceField(label="First Node", choices=G.node_choices(), required=True)
+        node_two = forms.ChoiceField(label="Second Node", choices=G.node_choices(), required=True)
+
+    if request.method == 'POST':
+        shortest_path_form = ShortestPathForm(request.POST)
+        if shortest_path_form.is_valid():
+            highlighted_node_one = shortest_path_form.cleaned_data['node_one']
+            highlighted_node_two = shortest_path_form.cleaned_data['node_two']
+            G.highlight_shortest_path_between(highlighted_node_one, highlighted_node_two)
+        form = netdispform(request.POST)
+        return render_to_response('netinfo.html', locals())
+    elif request.method == 'GET':
+        shortest_path_form = ShortestPathForm()
+        f = netdispform()
+        return render_to_response('netinfo.html', {'form': f, 'shortest_path_form': shortest_path_form})
+
         f = netdispform(request.GET)
         if not f.is_valid():
            return render_to_response('netinfo.html', {'form': f}) #do sth else
@@ -347,7 +363,6 @@ class netdispform(forms.Form):  #needs to be solved differently
     fprop=forms.ChoiceField(label="",choices=fprops,required=False)
     fformat=forms.ChoiceField(label="format", choices=foptions,required=False)
     layout=forms.ChoiceField(label="layout", choices=poptions,required=False)
-
 
 def degreedist(request):
     """

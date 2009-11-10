@@ -1,81 +1,64 @@
 {% extends "netbase.html" %}
 
-{% block action %}
-
-{% endblock %}
-
 {# i want to say: do not show this block if called from a certain view
 could do this by calling a different template, must be possible in one? #}
 
 {% block results %}
-
-{% if nn %}
-
-<div id="netstatbox">
-{# {%if locales()/ variables coming in from function call %} or don't I have to check for this? #}
- 
-<ul class="">
-<p>The results for the last uploaded network are:</p>
-<li>File name: {{fname}}</li>
-<li>Number of nodes: {{nn}}</li>
-<li>Number of edges: {{ne}}</li>
-<li>Diameter: {{d}}</li>
-<li>Radius: {{r}}</li>
-<li>Average shortest path length: {{asp}}</li>
-<li>Average clustering coefficient: {{avgcc}}</li> 
-<li>Number of connected components: {{conn}}</li>
-<li>Number of maximal cliques: {{mcn}}</li>
-<li>Number of the largest clique: {{cn}}</li> 
-<li>Transitivity: {{tr}}</li>
- 
-
-{# <li></li> not simple values without computation <li>Number of triangles: {{tn}}</li> <li>Brandes betweenness centrality: {{bbc}}</li> <li>connected: {{conl}}</li> #}
-
-{# <li>fsize: {{fsize}}</li> <li></li> <li>fread: {{fread}}</li> #}
-
-</ul>
-{# {%end if%} #}
-</div>
-
-{% endif %}
-
+  {% if nn %}
+    <div id="netstatbox">
+    {# {%if locales()/ variables coming in from function call %} or don't I have to check for this? #}
+    <ul class="">
+    <p>The results for the last uploaded network are:</p>
+    <li>File name: {{fname}}</li>
+    <li>Number of nodes: {{nn}}</li>
+    <li>Number of edges: {{ne}}</li>
+    <li>Diameter: {{d}}</li>
+    <li>Radius: {{r}}</li>
+    <li>Average shortest path length: {{asp}}</li>
+    <li>Average clustering coefficient: {{avgcc}}</li> 
+    <li>Number of connected components: {{conn}}</li>
+    <li>Number of maximal cliques: {{mcn}}</li>
+    <li>Number of the largest clique: {{cn}}</li> 
+    <li>Transitivity: {{tr}}</li>
+    {# <li></li> not simple values without computation <li>Number of triangles: {{tn}}</li> <li>Brandes betweenness centrality: {{bbc}}</li> <li>connected: {{conl}}</li> #}
+    {# <li>fsize: {{fsize}}</li> <li></li> <li>fread: {{fread}}</li> #}
+    </ul>
+    {# {%end if%} #}
+    </div>
+  {% endif %}
 {% endblock %}
 
-
 {% block error %}
-
-{% if noConnection %}
-<p style="color:red;margin-left:20px">Networkx returns 'the network is not connected' error. Working on support of unconnected graphs.</p>
-{% endif %}
-
-{% if noComponent %}
-<p style="color:red;margin-left:20px">Component analysis returned 0.</p>
-{% endif %}
-
-
-
+  {% if noConnection %}
+    <p style="color:red;margin-left:20px">Networkx returns 'the network is not connected' error. Working on support of unconnected graphs.</p>
+  {% endif %}
+  {% if noComponent %}
+    <p style="color:red;margin-left:20px">Component analysis returned 0.</p>
+  {% endif %}
 {% endblock%}
 
-
 {% block display %}
-
-{# from dotview.html; refactor to cull duplicate code, later? <b>{{pname}} </b><br/> #}
-<form action="/nets/netdisplay/" method="GET">
-<label><b>Displayed property:</b></label>{{form.fprop}}
-	<label><b>Image format:</b></label>{{form.fformat}}<label><b>Layout:</b></label>{{form.layout}}
-     {# <label><b>Reaction Label:</b></label>{{form.rlabel}}<label><b>Metabolite Label:</b></label>{{form.mlabel}}<br/> #}
-	<input type="submit" name="igem" value="draw">
-</form>
-{% ifequal format "svg" %}
-<embed src="/site_media/nets/{{pname}}.svg" width="500" height="500" type="image/svg+xml" pluginspace="http://www.adobe.com/svg/viewer/install/" 
-/>
-{% else %}
-  <img src="/site_media/nets/{{pname}}.{{format}}" title="Image of Properties of Uploaded Network" />
-{% endifequal %}
-
+  {# from dotview.html; refactor to cull duplicate code, later? <b>{{pname}} </b><br/> #}
+  <form action="/nets/netdisplay/" method="GET">
+    <label><b>Displayed property:</b></label>{{form.fprop}}
+    <label><b>Image format:</b></label>{{form.fformat}}<label><b>Layout:</b></label>{{form.layout}}
+    {# <label><b>Reaction Label:</b></label>{{form.rlabel}}<label><b>Metabolite Label:</b></label>{{form.mlabel}}<br/> #}
+    <input type="submit" name="igem" value="draw">
+  </form>
+  {% if shortest_path_form.is_valid %}
+    <p>Highlighted the shortest path between nodes '{{highlighted_node_one}}' and '{{highlighted_node_two}}'.</p>
+  {% endif %}
+  <form action="/nets/netdisplay/" method="POST">
+    <p>Highlight the shortest path between two nodes</p>
+    {{shortest_path_form.as_p}}
+    <input type="submit" value="Highlight" name="highlight" />
+  </form>
+  {% ifequal format "svg" %}
+    <embed src="/site_media/nets/{{pname}}.svg" width="500" height="500" type="image/svg+xml" pluginspace="http://www.adobe.com/svg/viewer/install/" />
+  {% else %}
+    <img src="/site_media/nets/{{pname}}.{{format}}" title="Image of Properties of Uploaded Network" />
+  {% endifequal %}
 {% endblock %}
 
 </body>
 </html>
-
- 

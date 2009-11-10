@@ -10,6 +10,9 @@ class WebbyGraph:
     def __init__(self, nx_graph = settings.NXGRAPHPATH):
         self.nx_graph = load_net(nx_graph)
 
+    def node_choices(self):
+        return [(n, n) for n in self.nx_graph.nodes()]
+
     def highlight_shortest_path_between(self, n1, n2):
         path = nx.shortest_path(self.nx_graph, n1, n2)
 

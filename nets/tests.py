@@ -18,6 +18,12 @@ class NetsTests(TestCase):
         resp = c.post('/nets/netupload/', {'file':open(os.path.join(test_net_path, 'test.adjlist'))})
         self.assertContains(resp, "uploaded")
 
+    def test_should_highligh_the_shortest_path_between_nodes(self):
+        c = Client()
+        resp = c.post('/nets/netdisplay/', {'node_one': '10', 'node_two': '8'})
+        #:MC: icky, brittle test, but how else can i test that the image is colored correctly?
+        self.assertContains(resp, "Highlighted the shortest path between nodes '10' and '8'")
+
     def test_load_net_should_load_known_net_types(self):
         files = ['test.adjlist', 'test.gml', 'test.edgelist']
         for name in files:
@@ -69,3 +75,8 @@ class NetsTests(TestCase):
                 self.assert_(green_patt.search(e.attr['_draw_']), 'Edge %s should be green in "%s"' % (e, e.attr['_draw_']))
             else:
                 self.assert_(black_patt.search(e.attr['_draw_']), 'Edge %s should be black in "%s"' % (e, e.attr['_draw_']))
+    def test_should_offer_node_choices(self):
+        g = nets.WebbyGraph(os.path.join(test_net_path, 'test.adjlist'))
+        choices = g.node_choices()
+        self.assertEqual(12, len(choices), "Should have twelve nodes in the test network.")
+        self.assert_(('9', '9') in choices)
