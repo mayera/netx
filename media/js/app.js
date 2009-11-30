@@ -42,8 +42,8 @@ var update_node_handler = function(nodes) {
         $('node_handler_form').disable();
     }
 };
-Event.observe(window, 'load', function() {
-        //var can = new Canviz("canviz_test", "/site_media/nets/livenet.xdot");
-        var can = new Canviz("canviz_test", "/nets/canviz/");
-        $('node_handler_form').disable();
-});
+// Event.observe(window, 'load', function() {
+//         //var can = new Canviz("canviz_test", "/site_media/nets/livenet.xdot");
+//         var can = new Canviz("canviz_test", "/nets/canviz/");
+//         $('node_handler_form').disable();
+// });
