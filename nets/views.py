@@ -74,68 +74,6 @@ def netstats_simple(g):
         } 
     return result
 
-def netstats_lists(g):
-    #not decided on what level to deal with this yet: 
-    #either return error un not dealing with unconnected files, 
-    #or making it deal with unconnected files: the latter.
-    #How about with dealing with each independently.
-    #    if not nx.is_connected(g):
-    #        conl= nx.connected_components(g)
-    #        for n in conl:
-    #            turn n into graph if it isnt
-    #            calculate ec, per, cnt
-    #            how and when to visualise the subgraphs?
-    #            iterate to next n
-        
-    if nx.is_connected(g):
-        ec = nx.eccentricity(g) 
-    else:
-        ec = 'NA - graph is not connected'
-    
-    per = nx.periphery(g)
-    cnt = nx.center(g)
-    result = { #"""fast betweenness algorithm"""  
-        'bbc': nx.brandes_betweenness_centrality(g),
-        'tn': nx.triangles(g), # number of triangles
-        'ec': ec,
-        'per': per,
-        'cnt': cnt,
-        'Per': g.subgraph(per),
-        'Cnt': g.subgraph(cnt)
-        }
-    return result 
-
-def netstats_listsundi(g):
-    if nx.is_connected(g): 
-        conl = nx.connected_components(g) #needs work-around for unconnected subgraphs
-        conl = conl.pop()
-    else:
-        conl = 'NA - graph is not connected'
-
-    result = { #"""returns boolean"""
-               'con': nx.is_connected(g),
-               'conn': nx.number_connected_components(g), 
-               'conl': conl,
-               'Conl': g.subgraph(conl)
-               }
-    return result    
-
-def netstats_listsdi(g):
-    #   UG = nx.to_undirected(g) #claims to not have this function     
-    if nx.is_strongly_connected(g): 
-        sconl = nx.strongly_connected_components(g)
-    else: sconl = 'NA - graph is not strongly connected'
-    result = {#"""returns boolean"""
-              'scon': nx.is_strongly_connected(g), 
-              'sconn': nx.number_connected_components(g),
-             # """returns boolean"""        
-              'dag': nx.is_directed_acyclic_graph(g),
-             # """returns lists"""
-              'sconl': nx.strongly_connected_components(g),
-              #Conl = connected_component_subgraphs(Ug)
-              }
-    return result    
-
 def netinfo(request):
     """Take uploaded network, find its values, output them"""
     # cleans out images, so that only the most recent upload displays: to be replaced with session handling
@@ -148,8 +86,8 @@ def netinfo(request):
         os.remove(os.path.join(MEDIA_ROOT, "nets", "degree_histogram.png"))
 
     g = nets.WebbyGraph()
-    if request.GET.has_key('node_zero') and request.GET.has_key('node_one'):
-        g.highlight_shortest_path_between(request.GET['node_zero'], request.GET['node_one'])
+    #     if request.GET.has_key('node_zero') and request.GET.has_key('node_one'):
+    #         g.highlight_shortest_path_between(request.GET['node_zero'], request.GET['node_one'])
     nssresult = netstats_simple(g.nx_graph)
     return render_to_response('netinfo.html', nssresult) 
 
@@ -164,42 +102,17 @@ def netdisplaytest(g,fprop,fformat,layout):
         print 'raised \n'
         raise NoConnectionError
 
-    nslresult = netstats_lists(g)
-    test = netstats_listsundi(g)
-    #print 'Showing dict:'
-    #print nslresult
-    #print 'Showing DICT:'  
-    #print test
-    #print 'Shown:'
+    nslresult = g.basic_stats() #netstats_lists(g)
+    test = g.undirected_stats() #netstats_listsundi(g)
     if not nx.is_directed(g):
         nslresult.update(test)
-        #print 'Showing dircdict:'
-        #print nslresult
     else:
         nslresult = dict((n, nslresult.get(n,0)) for n in set(nslresult).union(netstats_listsdi(g)))
-        #print 'Showing undircdict:'
-        #print nslresult
-    #defines a dict for every element of the set 
-    #print 'Showing added to dict test:'
-    #print nslresult
-    
-    #    prop = fprop
     prop = nslresult[fprop]    
     layout=layout
     fformat=fformat
-    #print 'prop:'
-    #print prop
-    #print "graph and nodes: %s %s" %(g, g.nodes())
     if prop == 0:
-        #print 'raised NoComponentError\n'
         raise NoComponentError
-        
-    #    print "%s %s" %(prop, prop.nodes())
-    #    print Per.has_node(2)
-    #    Per = nx.to_pydot(Per)
-  
-    #    if prop = 0:
-    #        return error "there are 0 of such components"
 
     #Creating graph
     J=nx.Graph()
@@ -245,7 +158,7 @@ def netdisplaytest(g,fprop,fformat,layout):
     #             vmax=1.0,
     #             with_labels=False
     #             )
-    plt.savefig(MEDIA_ROOT+'/nets/H.'+fformat,dpi=75)
+    plt.savefig(MEDIA_ROOT + '/nets/'+ pname + '.' + fformat, dpi=75)
     #        for m in Per: #or Per for J
     #            nodecol = [float(g.degree(m)) for m in J] # "g"
     #            nx.draw(g,
@@ -290,7 +203,7 @@ def netdisplay(request): #based on showpathgraph
     if not os.path.isfile(NXGRAPHPATH):
         raise FileNotFoundError
 
-    g = nets.Webbygraph() #.nx_graph
+    g = nets.WebbyGraph() #.nx_graph
     class ShortestPathForm(forms.Form):
         node_one = forms.ChoiceField(label="First Node", choices=g.node_choices(), required=True)
         node_two = forms.ChoiceField(label="Second Node", choices=g.node_choices(), required=True)
@@ -301,50 +214,54 @@ def netdisplay(request): #based on showpathgraph
                 raise forms.ValidationError("Please choose two different nodes")
             return cleaned_data
 
-    if request.method == 'POST':
-        shortest_path_form = ShortestPathForm(request.POST)
-        if shortest_path_form.is_valid():
-            highlighted_node_one = shortest_path_form.cleaned_data['node_one']
-            highlighted_node_two = shortest_path_form.cleaned_data['node_two']
-            g.highlight_shortest_path_between(highlighted_node_one, highlighted_node_two)
-        form = NetDispForm(request.POST)
-        return render_to_response('netinfo.html', locals())
-    elif request.method == 'GET':
-        shortest_path_form = ShortestPathForm()
-        f = NetDispForm()
-        return render_to_response('netinfo.html', {'form': f, 'shortest_path_form': shortest_path_form})
+    shortest_path_form = ShortestPathForm(request.POST)
+    if shortest_path_form.is_valid():
+        highlighted_node_one = shortest_path_form.cleaned_data['node_one']
+        highlighted_node_two = shortest_path_form.cleaned_data['node_two']
+        g.highlight_shortest_path_between(highlighted_node_one, highlighted_node_two)
+    else:
+        g.draw()
+    form = NetDispForm(request.POST)
+    pname = g.pname()
+    format = g.fformat
+    return render_to_response('netinfo.html', locals())
 
-        f = NetDispForm(request.GET)
-        if not f.is_valid():
-           return render_to_response('netinfo.html', {'form': f}) #do sth else
-        else:
-           if f.cleaned_data["fformat"]:
-              fformat=f.cleaned_data["fformat"] #not sure this is working; uncommenting fformat = 'svg' makes difference^M
-           else:   
-              fformat='png' #was jpg but not yet supported via matlab netdisplaytest; might be the httpresponse error cause
+#     elif request.method == 'GET':
+#         shortest_path_form = ShortestPathForm()
+#         f = NetDispForm()
+#         return render_to_response('netinfo.html', {'form': f, 'shortest_path_form': shortest_path_form})
+
+#         f = NetDispForm(request.GET)
+#         if not f.is_valid():
+#            return render_to_response('netinfo.html', {'form': f}) #do sth else
+#         else:
+#            if f.cleaned_data["fformat"]:
+#               fformat=f.cleaned_data["fformat"] #not sure this is working; uncommenting fformat = 'svg' makes difference^M
+#            else:   
+#               fformat='png' #was jpg but not yet supported via matlab netdisplaytest; might be the httpresponse error cause
  
-           if f.cleaned_data["layout"]:
-              layout=f.cleaned_data["layout"]
-           else:   
-              layout='dot'
-           if f.cleaned_data["fprop"]:
-              fprop=f.cleaned_data["fprop"]
-           else:   
-              fprop='Cnt'
+#            if f.cleaned_data["layout"]:
+#               layout=f.cleaned_data["layout"]
+#            else:   
+#               layout='dot'
+#            if f.cleaned_data["fprop"]:
+#               fprop=f.cleaned_data["fprop"]
+#            else:   
+#               fprop='Cnt'
 
-           print 'fprop here:' + fprop
-           pname = 'H'
-           #           fformat = 'png'
-           #           layout = 'neato'
+#            print 'fprop here:' + fprop
+#            pname = 'H'
+#            #           fformat = 'png'
+#            #           layout = 'neato'
 
-           try:
-               netdisplaytest(g,fprop,fformat,layout)
-           except NoConnectionError:
-               return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':False,'noConnection':True})
-           except NoComponentError:
-               return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':True, 'noConnection':False})
+#            try:
+#                netdisplaytest(g,fprop,fformat,layout)
+#            except NoConnectionError:
+#                return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':False,'noConnection':True})
+#            except NoComponentError:
+#                return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':True, 'noConnection':False})
 
-           return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname, 'noComponent':False, 'noConnection':False})
+#            return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname, 'noComponent':False, 'noConnection':False})
 
 
 class NetDispForm(forms.Form):  #needs to be solved differently

@@ -18,7 +18,7 @@ class NetsTests(TestCase):
         resp = c.post('/nets/netupload/', {'file':open(os.path.join(test_net_path, 'test.adjlist'))})
         self.assertContains(resp, "uploaded")
 
-    def test_should_highligh_the_shortest_path_between_nodes(self):
+    def _test_should_highligh_the_shortest_path_between_nodes(self):
         #:MC: icky, brittle test, but how else can i test that the image is colored correctly?
         c = Client()
         resp = c.post('/nets/netdisplay/', {'node_one': '10', 'node_two': '8'})
@@ -32,6 +32,10 @@ class NetsTests(TestCase):
             except Exception, e:
                 raise Exception("'%s' failed to parse: %s" % (name, e))
             self.assertEqual(11, g.size())
+
+    def test_drawing_does_not_blow_up(self):
+        g = nets.WebbyGraph(os.path.join(test_net_path, 'test.adjlist'))
+        g.draw()
 
     def _test_should_load_nets_from_file_streams(self):
         #:MC: this does not work properly with read_adjlist (at least).  it returns 0-sized nets.
