@@ -300,7 +300,6 @@ def netdisplay(request): #based on showpathgraph
                 cleaned_data.get('node_one') == cleaned_data.get('node_two') ):
                 raise forms.ValidationError("Please choose two different nodes")
             return cleaned_data
-                    
 
     if request.method == 'POST':
         shortest_path_form = ShortestPathForm(request.POST)
@@ -308,14 +307,14 @@ def netdisplay(request): #based on showpathgraph
             highlighted_node_one = shortest_path_form.cleaned_data['node_one']
             highlighted_node_two = shortest_path_form.cleaned_data['node_two']
             g.highlight_shortest_path_between(highlighted_node_one, highlighted_node_two)
-        form = netdispform(request.POST)
+        form = NetDispForm(request.POST)
         return render_to_response('netinfo.html', locals())
     elif request.method == 'GET':
         shortest_path_form = ShortestPathForm()
-        f = netdispform()
+        f = NetDispForm()
         return render_to_response('netinfo.html', {'form': f, 'shortest_path_form': shortest_path_form})
 
-        f = netdispform(request.GET)
+        f = NetDispForm(request.GET)
         if not f.is_valid():
            return render_to_response('netinfo.html', {'form': f}) #do sth else
         else:
@@ -348,9 +347,9 @@ def netdisplay(request): #based on showpathgraph
            return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname, 'noComponent':False, 'noConnection':False})
 
 
-class netdispform(forms.Form):  #needs to be solved differently
+class NetDispForm(forms.Form):  #needs to be solved differently
     if os.path.isfile(NXGRAPHPATH):
-        g=nx.read_adjlist(NXGRAPHPATH)
+        g = nx.read_adjlist(NXGRAPHPATH)
         if nx.is_directed(g):
             props= ('sconl', 'Strongly connected components')
             #       nslundiresult = netstats_listsundi(g)
