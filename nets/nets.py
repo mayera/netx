@@ -48,7 +48,10 @@ class WebbyGraph:
         pos = nx.graphviz_layout(self.nx_graph, prog=layout)
 
         #coloring graph in with two colors supposing to sets of nodes in prop
-        green = set(prop)
+        if hasattr(self, 'highlighted_nodes'):
+            green = set(self.highlighted_nodes)
+        else:
+            green = set(prop)
         red = set(self.nx_graph.nodes()).difference(green)
         items = [ ('r', red), ('g', green) ]
         for (color, list) in items:
