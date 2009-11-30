@@ -45,94 +45,94 @@ def netupload(request):
         return render_to_response('netupload.html', {'UploadException':True})
 
     file = request.FILES['file']
-    G = nets.WebbyGraph(file)
-    G.save()
+    g = nets.WebbyGraph(file)
+    g.save()
     
     return render_to_response('netupload.html', {'UploadException':False})
 
-def netstats_simple(G):
-    if nx.is_connected(G): 
-        d = nx.diameter(G)
-        r = nx.radius(G)
+def netstats_simple(g):
+    if nx.is_connected(g): 
+        d = nx.diameter(g)
+        r = nx.radius(g)
     else: 
         d = 'NA - graph is not connected' #should be calculatable on unconnected graph - see example code for hack
         r = 'NA - graph is not connected'
 
     #using dictionary to pack values and variablesdot, eps, ps, pdf break equally
     result = {#"""single value measures"""  
-        'nn': G.number_of_nodes(),
-        'ne': G.number_of_edges(),
+        'nn': g.number_of_nodes(),
+        'ne': g.number_of_edges(),
         'd': d,
         'r': r,
-        'conn': nx.number_connected_components(G),
-        'asp': nx.average_shortest_path_length(G), 
-        'cn': nx.graph_clique_number(G), # number of the largest clique
-        'mcn': nx.graph_number_of_cliques(G), # number of maximal cliques
-        'tr': nx.transitivity(G), # transitivity
-        'cc': nx.clustering(G), # clustering coefficient
-        'avgcc': nx.average_clustering(G),
+        'conn': nx.number_connected_components(g),
+        'asp': nx.average_shortest_path_length(g), 
+        'cn': nx.graph_clique_number(g), # number of the largest clique
+        'mcn': nx.graph_number_of_cliques(g), # number of maximal cliques
+        'tr': nx.transitivity(g), # transitivity
+        'cc': nx.clustering(g), # clustering coefficient
+        'avgcc': nx.average_clustering(g),
         } 
     return result
 
-def netstats_lists(G):
+def netstats_lists(g):
     #not decided on what level to deal with this yet: 
     #either return error un not dealing with unconnected files, 
     #or making it deal with unconnected files: the latter.
     #How about with dealing with each independently.
-    #    if not nx.is_connected(G):
-    #        conl= nx.connected_components(G)
+    #    if not nx.is_connected(g):
+    #        conl= nx.connected_components(g)
     #        for n in conl:
     #            turn n into graph if it isnt
     #            calculate ec, per, cnt
     #            how and when to visualise the subgraphs?
     #            iterate to next n
         
-    if nx.is_connected(G):
-        ec = nx.eccentricity(G) 
+    if nx.is_connected(g):
+        ec = nx.eccentricity(g) 
     else:
         ec = 'NA - graph is not connected'
     
-    per = nx.periphery(G)
-    cnt = nx.center(G)
+    per = nx.periphery(g)
+    cnt = nx.center(g)
     result = { #"""fast betweenness algorithm"""  
-        'bbc': nx.brandes_betweenness_centrality(G),
-        'tn': nx.triangles(G), # number of triangles
+        'bbc': nx.brandes_betweenness_centrality(g),
+        'tn': nx.triangles(g), # number of triangles
         'ec': ec,
         'per': per,
         'cnt': cnt,
-        'Per': G.subgraph(per),
-        'Cnt': G.subgraph(cnt)
+        'Per': g.subgraph(per),
+        'Cnt': g.subgraph(cnt)
         }
     return result 
 
-def netstats_listsundi(G):
-    if nx.is_connected(G): 
-        conl = nx.connected_components(G) #needs work-around for unconnected subgraphs
+def netstats_listsundi(g):
+    if nx.is_connected(g): 
+        conl = nx.connected_components(g) #needs work-around for unconnected subgraphs
         conl = conl.pop()
     else:
         conl = 'NA - graph is not connected'
 
     result = { #"""returns boolean"""
-               'con': nx.is_connected(G),
-               'conn': nx.number_connected_components(G), 
+               'con': nx.is_connected(g),
+               'conn': nx.number_connected_components(g), 
                'conl': conl,
-               'Conl': G.subgraph(conl)
+               'Conl': g.subgraph(conl)
                }
     return result    
 
-def netstats_listsdi(G):
-    #   UG = nx.to_undirected(G) #claims to not have this function     
-    if nx.is_strongly_connected(G): 
-        sconl = nx.strongly_connected_components(G)
+def netstats_listsdi(g):
+    #   UG = nx.to_undirected(g) #claims to not have this function     
+    if nx.is_strongly_connected(g): 
+        sconl = nx.strongly_connected_components(g)
     else: sconl = 'NA - graph is not strongly connected'
     result = {#"""returns boolean"""
-              'scon': nx.is_strongly_connected(G), 
-              'sconn': nx.number_connected_components(G),
+              'scon': nx.is_strongly_connected(g), 
+              'sconn': nx.number_connected_components(g),
              # """returns boolean"""        
-              'dag': nx.is_directed_acyclic_graph(G),
+              'dag': nx.is_directed_acyclic_graph(g),
              # """returns lists"""
-              'sconl': nx.strongly_connected_components(G),
-              #Conl = connected_component_subgraphs(UG)
+              'sconl': nx.strongly_connected_components(g),
+              #Conl = connected_component_subgraphs(Ug)
               }
     return result    
 
@@ -147,36 +147,36 @@ def netinfo(request):
     if os.path.isfile(os.path.join(MEDIA_ROOT, "nets", "degree_histogram.png")):
         os.remove(os.path.join(MEDIA_ROOT, "nets", "degree_histogram.png"))
 
-    G = nets.WebbyGraph()
+    g = nets.WebbyGraph()
     if request.GET.has_key('node_zero') and request.GET.has_key('node_one'):
-        G.highlight_shortest_path_between(request.GET['node_zero'], request.GET['node_one'])
-    nssresult = netstats_simple(G.nx_graph)
+        g.highlight_shortest_path_between(request.GET['node_zero'], request.GET['node_one'])
+    nssresult = netstats_simple(g.nx_graph)
     return render_to_response('netinfo.html', nssresult) 
 
-def netdisplaytest(G,fprop,fformat,layout):
+def netdisplaytest(g,fprop,fformat,layout):
     #stat: speed of matlab vs pydot in generating layouts and saving
     if not os.path.isfile(NXGRAPHPATH):
         raise FileNotFoundError
 
-    G = nets.WebbyGraph().nx_graph
+    g = nets.WebbyGraph().nx_graph
 
-    if not nx.is_connected(G):
+    if not nx.is_connected(g):
         print 'raised \n'
         raise NoConnectionError
 
-    nslresult = netstats_lists(G)
-    test = netstats_listsundi(G)
+    nslresult = netstats_lists(g)
+    test = netstats_listsundi(g)
     #print 'Showing dict:'
     #print nslresult
     #print 'Showing DICT:'  
     #print test
     #print 'Shown:'
-    if not nx.is_directed(G):
+    if not nx.is_directed(g):
         nslresult.update(test)
         #print 'Showing dircdict:'
         #print nslresult
     else:
-        nslresult = dict((n, nslresult.get(n,0)) for n in set(nslresult).union(netstats_listsdi(G)))
+        nslresult = dict((n, nslresult.get(n,0)) for n in set(nslresult).union(netstats_listsdi(g)))
         #print 'Showing undircdict:'
         #print nslresult
     #defines a dict for every element of the set 
@@ -189,7 +189,7 @@ def netdisplaytest(G,fprop,fformat,layout):
     fformat=fformat
     #print 'prop:'
     #print prop
-    #print "graph and nodes: %s %s" %(G, G.nodes())
+    #print "graph and nodes: %s %s" %(g, g.nodes())
     if prop == 0:
         #print 'raised NoComponentError\n'
         raise NoComponentError
@@ -217,14 +217,14 @@ def netdisplaytest(G,fprop,fformat,layout):
     plt.figure(1,figsize=(8,8))
     # layout graphs with positions using graphviz neato
     #    layout="neato"
-    pos=nx.graphviz_layout(G,prog=layout)
+    pos=nx.graphviz_layout(g,prog=layout)
 
     #coloring graph in with two colors supposing to sets of nodes in prop
     green = set(prop)
-    red = set(G.nodes()).difference(green)
+    red = set(g.nodes()).difference(green)
     items = [ ('r', red), ('g', green) ]
     for (color, list) in items:
-        nx.draw(G, pos,
+        nx.draw(g, pos,
                 nodelist=list,
                 node_color=color,
                 node_size=500,
@@ -232,9 +232,9 @@ def netdisplaytest(G,fprop,fformat,layout):
 
     #looking into multi-coloration of graphs; 
     #this should do it instead of the above, with some fudging 
-    #    pos=nx.graphviz_layout(G,prog="neato")
+    #    pos=nx.graphviz_layout(g,prog="neato")
     # color nodes the same in each connected subgraph
-    #    C=nx.connected_component_subgraphs(G)
+    #    C=nx.connected_component_subgraphs(g)
     #    for g in C:
     #        c=[random.random()]*nx.number_of_nodes(g) # random color...
     #        nx.draw(g,
@@ -247,8 +247,8 @@ def netdisplaytest(G,fprop,fformat,layout):
     #             )
     plt.savefig(MEDIA_ROOT+'/nets/H.'+fformat,dpi=75)
     #        for m in Per: #or Per for J
-    #            nodecol = [float(G.degree(m)) for m in J] # "g"
-    #            nx.draw(G,
+    #            nodecol = [float(g.degree(m)) for m in J] # "g"
+    #            nx.draw(g,
     #             pos,
     #             node_size=1000,
     #             node_color=nodecol,
@@ -256,13 +256,13 @@ def netdisplaytest(G,fprop,fformat,layout):
     #             )
     
     # refactor the below; created via http://networkx.lanl.gov/examples/drawing/labels_and_colors.html
-    #    nx.draw(G,pos,
-    #            nodelist=G.nodes(),
+    #    nx.draw(g,pos,
+    #            nodelist=g.nodes(),
     #            node_color='r',
     #            node_size=500,
     #            alpha=0.8) #prob. transparency
     
-    #    nx.draw(G,pos,
+    #    nx.draw(g,pos,
     #            nodelist=Per,
     #            node_color='g',
     #            node_size=500,
@@ -290,10 +290,10 @@ def netdisplay(request): #based on showpathgraph
     if not os.path.isfile(NXGRAPHPATH):
         raise FileNotFoundError
 
-    G = nets.WebbyGraph() #.nx_graph
+    g = nets.Webbygraph() #.nx_graph
     class ShortestPathForm(forms.Form):
-        node_one = forms.ChoiceField(label="First Node", choices=G.node_choices(), required=True)
-        node_two = forms.ChoiceField(label="Second Node", choices=G.node_choices(), required=True)
+        node_one = forms.ChoiceField(label="First Node", choices=g.node_choices(), required=True)
+        node_two = forms.ChoiceField(label="Second Node", choices=g.node_choices(), required=True)
         def clean(self):
             cleaned_data = self.cleaned_data
             if cleaned_data.get('node_one') and cleaned_data.get('node_two') and (
@@ -307,7 +307,7 @@ def netdisplay(request): #based on showpathgraph
         if shortest_path_form.is_valid():
             highlighted_node_one = shortest_path_form.cleaned_data['node_one']
             highlighted_node_two = shortest_path_form.cleaned_data['node_two']
-            G.highlight_shortest_path_between(highlighted_node_one, highlighted_node_two)
+            g.highlight_shortest_path_between(highlighted_node_one, highlighted_node_two)
         form = netdispform(request.POST)
         return render_to_response('netinfo.html', locals())
     elif request.method == 'GET':
@@ -339,7 +339,7 @@ def netdisplay(request): #based on showpathgraph
            #           layout = 'neato'
 
            try:
-               netdisplaytest(G,fprop,fformat,layout)
+               netdisplaytest(g,fprop,fformat,layout)
            except NoConnectionError:
                return render_to_response("netinfo.html", {'form':f,'format':fformat,'pname':pname,'noComponent':False,'noConnection':True})
            except NoComponentError:
@@ -350,12 +350,12 @@ def netdisplay(request): #based on showpathgraph
 
 class netdispform(forms.Form):  #needs to be solved differently
     if os.path.isfile(NXGRAPHPATH):
-        G=nx.read_adjlist(NXGRAPHPATH)
-        if nx.is_directed(G):
+        g=nx.read_adjlist(NXGRAPHPATH)
+        if nx.is_directed(g):
             props= ('sconl', 'Strongly connected components')
-            #       nslundiresult = netstats_listsundi(G)
+            #       nslundiresult = netstats_listsundi(g)
         else:
-            #        nsldiresult = netstats_listsdi(G)
+            #        nsldiresult = netstats_listsdi(g)
             props= ('Conl', 'Connected components')
     else: 
         props= ('Conl', 'Connected components')
@@ -376,9 +376,9 @@ def degreedist(request):
     Based on degree_histogram.pb by Aric Hagberg (hagberg@lanl.gov)
     """
 
-    G = nets.WebbyGraph().nx_graph
+    g = nets.WebbyGraph().nx_graph
 
-    degree_sequence=sorted(nx.degree(G),reverse=True) # degree sequence
+    degree_sequence=sorted(nx.degree(g),reverse=True) # degree sequence
     # print "Degree sequence", degree_sequence
     dmax=max(degree_sequence)
     plt.clf()
@@ -389,11 +389,11 @@ def degreedist(request):
 
     # draw graph in inset
     plt.axes([0.45,0.45,0.45,0.45])
-    Gcc=nx.connected_component_subgraphs(G)[0]
-    pos=nx.spring_layout(Gcc)
+    gcc=nx.connected_component_subgraphs(g)[0]
+    pos=nx.spring_layout(gcc)
     plt.axis('off')
-    nx.draw_networkx_nodes(Gcc,pos,node_size=20)
-    nx.draw_networkx_edges(Gcc,pos,alpha=0.4)
+    nx.draw_networkx_nodes(gcc,pos,node_size=20)
+    nx.draw_networkx_edges(gcc,pos,alpha=0.4)
 
     plt.savefig(MEDIA_ROOT+"/nets/degree_histogram.png", dpi=50)
 
@@ -404,7 +404,7 @@ def degreedist(request):
 """
 multiple values returned: sets of nodes or edges, paths,..., or graph 
 objects etc, display to be suited
-    a = nx.single_source_shortest_path_length(G,go,cutoff=None)
+    a = nx.single_source_shortest_path_length(g,go,cutoff=None)
 """
   
 
