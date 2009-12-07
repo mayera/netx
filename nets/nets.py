@@ -1,4 +1,4 @@
-import re, types, pygraphviz, os
+import re, types, os
 import networkx as nx
 import matplotlib.pyplot as pyplot
 import settings
